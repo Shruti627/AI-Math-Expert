@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Math Solver</title>
+  
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      text-align: center; 
+      background: #f4f4f4; 
+      margin: 0; 
+      padding: 20px; 
+    }
+    .container { 
+      max-width: 600px; 
+      margin: auto; 
+      padding: 20px; 
+      background: white; 
+      border-radius: 8px; 
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
+    }
+    input, button { 
+      margin: 10px; 
+      padding: 10px; 
+      width: 80%; 
+    }
+    button { 
+      cursor: pointer; 
+      border: none; 
+      border-radius: 5px; 
+      padding: 10px; 
+    }
+    pre { 
+      text-align: left; 
+      background: #000; 
+      color: #0f0; 
+      padding: 10px; 
+      white-space: pre-wrap; 
+      border-radius: 5px; 
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Math Solver</h1>
+  <div class="container">
+    <input type="text" id="math-input" placeholder="Enter a math problem (e.g., Solve x^2 - 5x + 6 = 0)" />
+    <button onclick="solveMath()" style="background: green; color: white;">Solve</button>
+    <h3>Solution:</h3>
+    <pre id="solution"></pre>
+  </div>
+
+  <script>
+    const API_KEY = "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"; 
+    const API_URL = "https://api.groq.com/openai/v1/chat/completions"; 
+    const MODEL_NAME = "llama3-8b-8192"; 
+
+    async function solveMath() {
+      const mathProblem = document.getElementById("math-input").value.trim();
+      if (!mathProblem) return alert("Please enter a math problem.");
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${API_KEY}`
+          },
+          body: JSON.stringify({
+            model: MODEL_NAME,
+            messages: [
+              { role: "system", content: "You are a math expert. Solve the math problem step-by-step and provide a detailed explanation." },
+              { role: "user", content: `Solve this problem: ${mathProblem}` }
+            ],
+            max_tokens: 500
+          })
+        });
+
+        if (!response.ok) throw new Error(`API error: ${response.status} ${response.statusText}`);
+
+        const data = await response.json();
+        const solutionText = data?.choices?.[0]?.message?.content?.trim();
+        document.getElementById("solution").innerText = solutionText || "No solution provided by the AI.";
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Failed to get a solution. Check console for details.");
+      }
+    }
+  </script>
+</body>
+</html>
